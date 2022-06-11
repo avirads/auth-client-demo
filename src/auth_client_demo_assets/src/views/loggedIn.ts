@@ -2,7 +2,6 @@ import { ActorSubclass } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { html, render } from "lit-html";
 import { renderIndex } from ".";
-import { _SERVICE } from "../../../declarations/whoami/whoami.did";
 
 const content = () => html`<div class="container">
   <style>
@@ -13,33 +12,19 @@ const content = () => html`<div class="container">
   </style>
   <h1>Internet Identity Client</h1>
   <h2>You are authenticated!</h2>
-  <p>To see how a canister views you, click this button!</p>
-  <button type="button" id="whoamiButton" class="primary">Who am I?</button>
-  <input type="text" readonly id="whoami" placeholder="your Identity" />
-  <button id="logout">log out</button>
 </div>`;
 
-export const renderLoggedIn = (
-  actor: ActorSubclass<_SERVICE>,
-  authClient: AuthClient
-) => {
-  render(content(), document.getElementById("pageContent") as HTMLElement);
+export const renderLoggedIn = (actor, authClient) => {
+  render(content(), document.getElementById("pageContent"));
 
-  (document.getElementById("whoamiButton") as HTMLButtonElement).onclick =
-    async () => {
-      try {
-        const response = await actor.whoami();
-        console.log(response);
-        (document.getElementById("whoami") as HTMLInputElement).value =
-          response.toString();
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  document.getElementById("whoamiButton").onclick = async () => {
+    try {
+      const response = await actor.whoami();
+      console.log(response);
+      document.getElementById("whoami").value = response.toString();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  (document.getElementById("logout") as HTMLButtonElement).onclick =
-    async () => {
-      await authClient.logout();
-      renderIndex();
-    };
 };
