@@ -4,16 +4,13 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
-const network =
-  process.env.DFX_NETWORK ||
-  (process.env.NODE_ENV === "production" ? "ic" : "local");
-
 // Replace this value with the ID of your local Internet Identity canister
 const LOCAL_II_CANISTER =
-  "http://rkp4c-7iaaa-aaaaa-aaaca-cai.localhost:8000/#authorize";
+  "http://r7inp-6aaaa-aaaaa-aaabq-cai.localhost:8000/#authorize";
 
-function initCanisterEnv() {
-  let localCanisters, prodCanisters;
+let localCanisters, prodCanisters, canisters;
+
+function initCanisterIds() {
   try {
     localCanisters = require(path.resolve(
       ".dfx",
@@ -29,22 +26,26 @@ function initCanisterEnv() {
     console.log("No production canister_ids.json found. Continuing with local");
   }
 
-  const canisterConfig = network === "local" ? localCanisters : prodCanisters;
+  const network =
+    process.env.DFX_NETWORK ||
+    (process.env.NODE_ENV === "production" ? "ic" : "local");
 
-  return Object.entries(canisterConfig).reduce((prev, current) => {
-    const [canisterName, canisterDetails] = current;
-    prev[canisterName.toUpperCase() + "_CANISTER_ID"] =
-      canisterDetails[network];
-    return prev;
-  }, {});
+  canisters = network === "local" ? localCanisters : prodCanisters;
+
+  for (const canister in canisters) {
+    process.env[canister.toUpperCase() + "_CANISTER_ID"] =
+      canisters[canister][network];
+  }
 }
-const canisterEnvVariables = initCanisterEnv();
+initCanisterIds();
 
 const isDevelopment = process.env.NODE_ENV !== "production";
-
-const frontendDirectory = "auth_client_demo_assets";
-
-const asset_entry = path.join("src", frontendDirectory, "src", "index.html");
+const asset_entry = path.join(
+  "src",
+  "auth_client_demo_assets",
+  "src",
+  "index.html"
+);
 
 module.exports = {
   target: "web",
@@ -52,7 +53,7 @@ module.exports = {
   entry: {
     // The frontend.entrypoint points to the HTML file for this build, so we need
     // to replace the extension to `.js`.
-    index: path.join(__dirname, asset_entry).replace(/\.html$/, ".ts"),
+    index: path.join(__dirname, asset_entry).replace(/\.html$/, ".js"),
   },
   devtool: isDevelopment ? "source-map" : false,
   optimization: {
@@ -71,7 +72,7 @@ module.exports = {
   },
   output: {
     filename: "index.js",
-    path: path.join(__dirname, "dist", frontendDirectory),
+    path: path.join(__dirname, "dist", "auth_client_demo_assets"),
   },
 
   // Depending in the language or framework you are using for
@@ -82,7 +83,7 @@ module.exports = {
   module: {
     rules: [
       { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
-      //    { test: /\.css$/, use: ['style-loader','css-loader'] }
+      //  { test: /\.css$/, use: ['style-loader','css-loader'] }
     ],
   },
   plugins: [
@@ -93,16 +94,20 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.join(__dirname, "src", frontendDirectory, "assets"),
-          to: path.join(__dirname, "dist", frontendDirectory),
+          from: path.join(
+            __dirname,
+            "src",
+            "auth_client_demo_assets",
+            "assets"
+          ),
+          to: path.join(__dirname, "dist", "auth_client_demo_assets"),
         },
       ],
     }),
     new webpack.EnvironmentPlugin({
-      NODE_ENV: "development",
+      NODE_ENV: isDevelopment ? "development" : "production",
       LOCAL_II_CANISTER,
-      DFX_NETWORK: network,
-      ...canisterEnvVariables,
+      DFX_NETWORK: process.env.DFX_NETWORK || "local",
     }),
     new webpack.ProvidePlugin({
       Buffer: [require.resolve("buffer/"), "Buffer"],
@@ -121,7 +126,7 @@ module.exports = {
       },
     },
     hot: true,
-    watchFiles: [path.resolve(__dirname, "src", frontendDirectory)],
-    liveReload: true,
+    contentBase: path.resolve(__dirname, "./src/auth_client_demo_assets"),
+    watchContentBase: true,
   },
 };
