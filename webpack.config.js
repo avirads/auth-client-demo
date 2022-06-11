@@ -6,7 +6,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 // Replace this value with the ID of your local Internet Identity canister
 const LOCAL_II_CANISTER =
-  "http://rkp4c-7iaaa-aaaaa-aaaca-cai.localhost:8000/#authorize";
+  "http://r7inp-6aaaa-aaaaa-aaabq-cai.localhost:8000/#authorize";
 
 let localCanisters, prodCanisters, canisters;
 
@@ -106,7 +106,6 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: isDevelopment ? "development" : "production",
-      WHOAMI_CANISTER_ID: canisters["whoami"],
       LOCAL_II_CANISTER,
       DFX_NETWORK: process.env.DFX_NETWORK || "local",
     }),

@@ -2,7 +2,6 @@ import { ActorSubclass } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { html, render } from "lit-html";
 import { renderIndex } from ".";
-import { _SERVICE } from "../../../declarations/whoami/whoami.did";
 
 const content = () => html`<div class="container">
   <style>
@@ -13,10 +12,6 @@ const content = () => html`<div class="container">
   </style>
   <h1>Internet Identity Client</h1>
   <h2>You are authenticated!</h2>
-  <p>To see how a canister views you, click this button!</p>
-  <button type="button" id="whoamiButton" class="primary">Who am I?</button>
-  <input type="text" readonly id="whoami" placeholder="your Identity" />
-  <button id="logout">log out</button>
 </div>`;
 
 export const renderLoggedIn = (actor, authClient) => {
@@ -32,8 +27,4 @@ export const renderLoggedIn = (actor, authClient) => {
     }
   };
 
-  document.getElementById("logout").onclick = async () => {
-    await authClient.logout();
-    renderIndex();
-  };
 };

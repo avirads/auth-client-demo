@@ -1,11 +1,6 @@
 {
   "canisters": {
-    "whoami": {
-      "main": "src/whoami/main.mo",
-      "type": "motoko"
-    },
     "auth_client_demo_assets": {
-      "dependencies": ["whoami"],
       "frontend": {
         "entrypoint": "src/auth_client_demo_assets/src/index.html"
       },
@@ -22,7 +17,7 @@
       "packtool": ""
     }
   },
-  "dfx": "0.8.0",
+  "dfx": "0.10.0",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",
